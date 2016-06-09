@@ -1,8 +1,6 @@
 package com.elevatorsim;
 
-import java.util.PriorityQueue;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import static java.lang.Math.abs;
 
@@ -75,19 +73,49 @@ public class Elevator {
 
     }
 
-    private int getClosestFloor() {
-        if (!this.requestsToPickup.isEmpty())
+    private int getClosestStop() {
+        Request currentRequest;
+        int minDistance = this.maxFloor;
+        int currentDistance;
+        int bestFloor = this.currentFloor;
+        Iterator<Request> requestIterator;
+        if (!this.requestsToPickup.isEmpty()) {
+            requestIterator = this.requestsToPickup.iterator();
+            while (requestIterator.hasNext()) {
+                currentRequest = requestIterator.next();
+                currentDistance = getFloorDistance(currentRequest.getSourceFloor());
+                if (currentDistance < minDistance) {
+                    minDistance = currentDistance;
+                    bestFloor = currentRequest.getSourceFloor();
+                }
+            }
+        }
+        if (!this.requestsToDropOff.isEmpty()) {
+            requestIterator = this.requestsToDropOff.iterator();
+            while (requestIterator.hasNext()) {
+                currentRequest = requestIterator.next();
+                currentDistance = getFloorDistance(currentRequest.getDestinationFloor());
+                if (currentDistance < minDistance) {
+                    minDistance = currentDistance;
+                    bestFloor = currentRequest.getDestinationFloor();
+                }
+            }
+        }
+        return bestFloor;
     }
 
     public void proceed() {
         if (!this.serviceNeeded) {
-            if (this.currentFloor != this.destinationFloor) {
-                if (this.currentFloor > this.destinationFloor) {
+            int nextStop = getClosestStop();
+            if (this.currentFloor != nextStop) {
+                if (this.currentFloor > nextStop) {
                     this.currentFloor--;
                 } else {
                     this.currentFloor++;
                 }
-            } else if (this.occupationState == OccupationState.OCCUPIED) {
+            } else {
+                if () // Check if this floor was destination of request
+                if () // Check if this floor was source of request
                 this.doorState = DoorState.OPEN;
                 // TODO: need to check if there is a second destination floor
                 this.occupationState = OccupationState.UNOCCUPIED;
@@ -107,5 +135,10 @@ public class Elevator {
 
     public void addRequest(Request req) {
         this.requestsToPickup.add(req);
+    }
+
+    private int clearDestinationRequestByFloor(int floorNum) {
+        Iterator<Request> requestIterator = this.requestsToDropOff.iterator();
+        
     }
 }
