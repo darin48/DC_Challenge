@@ -42,6 +42,7 @@ public class Elevator {
 
     public void serviceElevator() {
         this.serviceNeeded = false;
+        this.nextServiceTripCount += MAX_TRIPS_BEFORE_SERVICE;
     }
 
     private boolean floorValid(int floorNumber) {
@@ -84,7 +85,7 @@ public class Elevator {
         return bestFloor;
     }
 
-    public void proceed() {
+    public void step() {
         if (!this.serviceNeeded) {
             int nextStop = getClosestStop();
             if (this.currentFloor != nextStop) {
@@ -104,12 +105,19 @@ public class Elevator {
                     this.doorState = DoorState.OPEN;
                 } else {
                     this.tripCount += clearDestinationRequest();
-                    if (this.tripCount > )
-                    makePickup();
-                    if (this.requestsToDropOff.isEmpty()) {
+                    if (this.tripCount >= this.nextServiceTripCount) {
+                        this.serviceNeeded = true;
+                        // Kick anyone still on the elevator off
                         this.occupationState = OccupationState.UNOCCUPIED;
+                        this.requestsToDropOff.clear();
+                        this.requestsToPickup.clear();
                     } else {
-                        this.occupationState = OccupationState.OCCUPIED;
+                        makePickup();
+                        if (this.requestsToDropOff.isEmpty()) {
+                            this.occupationState = OccupationState.UNOCCUPIED;
+                        } else {
+                            this.occupationState = OccupationState.OCCUPIED;
+                        }
                     }
                 }
             }

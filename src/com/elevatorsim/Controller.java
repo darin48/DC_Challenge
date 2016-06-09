@@ -10,12 +10,10 @@ import java.util.List;
  */
 public class Controller {
     private List<Elevator> elevatorList;
-    private List<Request> requestList;
     private Building building;
 
     public Controller(Building building) {
         this.elevatorList = new ArrayList<>();
-        this.requestList = new ArrayList<>();
         this.building = building;
         for (int i = 0; i < building.getElevatorCount(); i++) {
             elevatorList.add(new Elevator(building, this));
@@ -39,6 +37,18 @@ public class Controller {
         }
         if (bestElevatorOption != null) {
             bestElevatorOption.addRequest(req);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void step() {
+        Iterator<Elevator> iterator = elevatorList.iterator();
+        Elevator elevator;
+        while (iterator.hasNext()) {
+            elevator = iterator.next();
+            elevator.step();
         }
     }
 }

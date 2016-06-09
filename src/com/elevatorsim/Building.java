@@ -12,7 +12,7 @@ public class Building {
     public Building() {
         // Default floor and elevator count to 1 if not specified
         this.floorCount = 1;
-        this.minimumFloor = 1;
+        this.minimumFloor = 1; // Make variable in case basements are added later
         this.elevatorCount = 1;
     }
 
