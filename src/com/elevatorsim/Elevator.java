@@ -13,6 +13,7 @@ public class Elevator {
     private boolean serviceNeeded;
     private DoorState doorState;
     private OccupationState occupationState;
+    private Controller controller;
 
     public Elevator() {
         this.doorState = DoorState.CLOSED;
@@ -24,7 +25,7 @@ public class Elevator {
         this.serviceNeeded = false;
     }
 
-    public Elevator(Building building) {
+    public Elevator(Building building, Controller controller) {
         this.doorState = DoorState.CLOSED;
         this.occupationState = OccupationState.UNOCCUPIED;
         this.minFloor = building.getMinimumFloor();
@@ -32,14 +33,34 @@ public class Elevator {
         this.tripCount = 0;
         this.currentFloor = minFloor;
         this.serviceNeeded = false;
+        this.controller = controller;
     }
 
     public void serviceElevator() {
         this.serviceNeeded = false;
     }
 
-    public void processRequest(int sourceFloor, int destinationFloor) {
-        if ()
+    public boolean processRequest(int sourceFloor, int destinationFloor) {
+        if (floorValid(sourceFloor) && floorValid(destinationFloor)) {
+            if ((this.currentFloor != sourceFloor) &&
+                    (this.doorState == DoorState.OPEN)) {
+                closeDoors();
+            }
+            this.doorState = DoorState.CLOSED;
+        }
     }
 
+    private boolean floorValid(int floorNumber) {
+        if ((floorNumber < this.minFloor) ||
+                (floorNumber > this.maxFloor)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean closeDoors() {
+        this.doorState = DoorState.CLOSED;
+
+    }
 }
