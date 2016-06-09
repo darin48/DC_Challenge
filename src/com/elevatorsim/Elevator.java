@@ -10,11 +10,13 @@ import static java.lang.Math.abs;
 public class Elevator {
     public enum DoorState {OPEN, CLOSED}
     public enum OccupationState {UNOCCUPIED, OCCUPIED}
+    public static final int MAX_TRIPS_BEFORE_SERVICE = 100;
     private int currentFloor;
-    private SortedSet<Integer> destinationFloors;
     private SortedSet<Request> requestsToPickup;
     private SortedSet<Request> requestsToDropOff;
     private int tripCount;
+    private int nextServiceTripCount;
+    private int floorCount;
     private static int maxFloor;
     private static int minFloor;
     private boolean serviceNeeded;
@@ -22,16 +24,6 @@ public class Elevator {
     private OccupationState occupationState;
     private Controller controller;
 
-    public Elevator() {
-        this.doorState = DoorState.CLOSED;
-        this.occupationState = OccupationState.UNOCCUPIED;
-        this.minFloor = 1;
-        this.maxFloor = 10;
-        this.tripCount = 0;
-        this.currentFloor = minFloor;
-        this.destinationFloors = new TreeSet();
-        this.serviceNeeded = false;
-    }
 
     public Elevator(Building building, Controller controller) {
         this.doorState = DoorState.CLOSED;
@@ -39,24 +31,17 @@ public class Elevator {
         this.minFloor = building.getMinimumFloor();
         this.maxFloor = building.getMaximumFloor();
         this.tripCount = 0;
+        this.nextServiceTripCount = 0;
+        this.floorCount = 0;
         this.currentFloor = minFloor;
-        this.destinationFloors = new TreeSet();
+        this.requestsToPickup = new TreeSet();
+        this.requestsToDropOff = new TreeSet();
         this.serviceNeeded = false;
         this.controller = controller;
     }
 
     public void serviceElevator() {
         this.serviceNeeded = false;
-    }
-
-    public boolean processRequest(int sourceFloor, int destinationFloor) {
-        if (floorValid(sourceFloor) && floorValid(destinationFloor)) {
-            if ((this.currentFloor != sourceFloor) &&
-                    (this.doorState == DoorState.OPEN)) {
-                closeDoors();
-            }
-            this.doorState = DoorState.CLOSED;
-        }
     }
 
     private boolean floorValid(int floorNumber) {
@@ -66,11 +51,6 @@ public class Elevator {
         } else {
             return true;
         }
-    }
-
-    private boolean closeDoors() {
-        this.doorState = DoorState.CLOSED;
-
     }
 
     private int getClosestStop() {
@@ -108,17 +88,30 @@ public class Elevator {
         if (!this.serviceNeeded) {
             int nextStop = getClosestStop();
             if (this.currentFloor != nextStop) {
-                if (this.currentFloor > nextStop) {
-                    this.currentFloor--;
-                } else {
-                    this.currentFloor++;
+                if (this.doorState == DoorState.OPEN) {
+                    this.doorState = DoorState.CLOSED;
+                }
+                else {
+                    this.floorCount++;
+                    if (this.currentFloor > nextStop) {
+                        this.currentFloor--;
+                    } else {
+                        this.currentFloor++;
+                    }
                 }
             } else {
-                if () // Check if this floor was destination of request
-                if () // Check if this floor was source of request
-                this.doorState = DoorState.OPEN;
-                // TODO: need to check if there is a second destination floor
-                this.occupationState = OccupationState.UNOCCUPIED;
+                if (this.doorState == DoorState.CLOSED) {
+                    this.doorState = DoorState.OPEN;
+                } else {
+                    this.tripCount += clearDestinationRequest();
+                    if (this.tripCount > )
+                    makePickup();
+                    if (this.requestsToDropOff.isEmpty()) {
+                        this.occupationState = OccupationState.UNOCCUPIED;
+                    } else {
+                        this.occupationState = OccupationState.OCCUPIED;
+                    }
+                }
             }
         }
     }
@@ -137,8 +130,30 @@ public class Elevator {
         this.requestsToPickup.add(req);
     }
 
-    private int clearDestinationRequestByFloor(int floorNum) {
+    private int clearDestinationRequest() {
         Iterator<Request> requestIterator = this.requestsToDropOff.iterator();
-        
+        int clearedCount = 0;
+        while (requestIterator.hasNext()) {
+            Request request = requestIterator.next();
+            if (request.getDestinationFloor() == this.currentFloor) {
+                this.requestsToDropOff.remove(request);
+                clearedCount++;
+            }
+        }
+        return clearedCount;
+    }
+
+    private int makePickup() {
+        Iterator<Request> requestIterator = this.requestsToPickup.iterator();
+        int clearedCount = 0;
+        while (requestIterator.hasNext()) {
+            Request request = requestIterator.next();
+            if (request.getSourceFloor() == this.currentFloor) {
+                this.requestsToPickup.remove(request);
+                this.requestsToDropOff.add(request);
+                clearedCount++;
+            }
+        }
+        return clearedCount;
     }
 }
