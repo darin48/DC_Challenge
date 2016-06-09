@@ -4,6 +4,8 @@ import java.util.PriorityQueue;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import static java.lang.Math.abs;
+
 /**
  * Created by Darin on 6/9/2016.
  */
@@ -12,6 +14,8 @@ public class Elevator {
     public enum OccupationState {UNOCCUPIED, OCCUPIED}
     private int currentFloor;
     private SortedSet<Integer> destinationFloors;
+    private SortedSet<Request> requestsToPickup;
+    private SortedSet<Request> requestsToDropOff;
     private int tripCount;
     private static int maxFloor;
     private static int minFloor;
@@ -71,6 +75,10 @@ public class Elevator {
 
     }
 
+    private int getClosestFloor() {
+        if (!this.requestsToPickup.isEmpty())
+    }
+
     public void proceed() {
         if (!this.serviceNeeded) {
             if (this.currentFloor != this.destinationFloor) {
@@ -85,5 +93,19 @@ public class Elevator {
                 this.occupationState = OccupationState.UNOCCUPIED;
             }
         }
+    }
+
+    public int getFloorDistance(int floorToCheck) {
+        if (!this.serviceNeeded) {
+            // TODO: check if the destination floor is different than current.  If different, and
+            // current trip pushes over 100 trips, will need service after current trip
+            return abs(floorToCheck - this.currentFloor);
+        } else {
+            return this.maxFloor;
+        }
+    }
+
+    public void addRequest(Request req) {
+        this.requestsToPickup.add(req);
     }
 }
