@@ -1,6 +1,7 @@
 package com.elevatorsim;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -19,6 +20,10 @@ public class Controller {
     }
 
     public boolean addRequest(Request req) {
-        
+        // TODO: Add request validation
+        Iterator<Elevator> iterator = elevatorList.iterator();
+        while (iterator.hasNext()) {
+            
+        }
     }
 }
